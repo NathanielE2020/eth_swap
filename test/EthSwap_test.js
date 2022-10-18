@@ -38,12 +38,6 @@ contract('EthSwap', ([deployer, investor]) => {
      })
    })
 
-   describe('Token deployment', async () => {
-   })
-
-   describe('ethSwap deployment', async () => {
-   })
-
    describe('buyTokens()', async () => {
      let result
 
@@ -66,7 +60,7 @@ contract('EthSwap', ([deployer, investor]) => {
        
         // Check logs to ensure event was emitted with correct data
          const event = result.logs[0].args
-         assert.equal(event.account, investor)
+         assert.equal(event.accounts, investor)
          assert.equal(event.token, token.address)
          assert.equal(event.amount.toString(), tokens('100').toString())
          assert.equal(event.rate.toString(), '100')
@@ -97,19 +91,14 @@ contract('EthSwap', ([deployer, investor]) => {
    
      // Check logs to ensure event was emitted with correct data
      const event = result.logs[0].args
-     assert.equal(event.account, investor)
+     assert.equal(event.accounts, investor)
      assert.equal(event.token, token.address)
      assert.equal(event.amount.toString(), tokens('100').toString())
      assert.equal(event.rate.toString(), '100')
     
      // FAILURE: investor can't sell more tokens than they have
-     await ethSwap.sellTokens(token('500', { from: investor }).should.be.rejected);
+     await ethSwap.sellTokens(tokens('500'), { from: investor }).should.be.rejected;
 
     })
   })
-
-
-
-
-
 })
