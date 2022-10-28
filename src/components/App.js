@@ -41,9 +41,9 @@ class App extends Component {
     const tokenData = Token.networks[networkId]
     if(tokenData) {
       const token = new web3.eth.Contract(Token.abi, tokenData.address)
-    this.setState({ token })
-    let tokenBalance = await token.methods.balanceOf(this.state.account).call()
-    this.setState({ tokenBalance: tokenBalance.toString()})
+      this.setState({ token })
+      let tokenBalance = await token.methods.balanceOf(this.state.account).call()
+      this.setState({ tokenBalance: tokenBalance.toString() })
     } else {
       window.alert('Token contract not deployed to detected network.')
     }
@@ -56,9 +56,25 @@ class App extends Component {
         } else {
           window.alert('EthSwap contract not deployed to detected network.')
         }
-         console.log(this.state.ethSwap)
-         this.setState({ loading: false })
+        
+        this.setState({ loading: false })
   }
+
+     buyTokens = (etherAmount) => {
+       this.setState({ loading: true })
+       this.state.ethSwap.methods.buyTokens().send({ value: etherAmount, from: this.state.account }).on('transectionHash', (hash) => {
+        this.setState({ loading: false })
+       })
+      }
+
+      sellTokens = (tokenAmount) => {
+        this.setState({ loading: true })
+        this.state.token.methods.approve(this.state.ethSwap.address, tokenAmount).send({ from: this.state.account }).on('transectionHash', (hash) => {
+        this.state.ethSwap.methods.sellTokens(tokenAmount).send({ from: this.state.account }).on('transectionHash', (hash) => {
+          this.setState({ loading: false })
+        })
+      })
+       }
 
   constructor(props) {
     super(props)
@@ -77,8 +93,14 @@ class App extends Component {
     if(this.state.loading) {
       content = <p id="loader" className="text-center">Loading...</p>
     } else {
-      content = <Main />
+      content = <Main 
+      ethBalance={this.state.ethBalance} 
+      tokenBalance={this.state.tokenBalance} 
+      buyTokens={this.buyTokens}
+      sellTokens={this.sellTokens}
+      />
     }
+
     return (
       <div>
         <Navbar account={this.state.account}/>
